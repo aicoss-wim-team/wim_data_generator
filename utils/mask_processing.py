@@ -131,8 +131,8 @@ if __name__ == '__main__':
 
     # image = cv2.imread('example/boat.jpg')
     # mask = cv2.imread('example/boat_mask_2.png', cv2.IMREAD_GRAYSCALE)
-    image = cv2.imread('./example/groceries.jpg')
-    mask = cv2.imread('example/groceries_mask_2.png', cv2.IMREAD_GRAYSCALE)
+    image = cv2.imread('../../wim_data/train/images/2023-04-21_48.mp4#t=0.jpg')
+    mask = cv2.imread('../results/2023-04-21_48.mp4#t=0/mask_2.png', cv2.IMREAD_GRAYSCALE)
     # image = cv2.imread('example/bridge.jpg')
     # mask = cv2.imread('example/bridge_mask_2.png', cv2.IMREAD_GRAYSCALE)
     # image = cv2.imread('example/person_umbrella.jpg')
@@ -145,16 +145,18 @@ if __name__ == '__main__':
     # ^ Please conduct inpainting or filling here on the cropped image with the cropped mask
     # ^ ------------------------------------------------------------------------------------
 
-    # e.g.
+    # e.g./raid/coss07/wim_data_generator
     # cropped_image[cropped_mask==255] = 0
-    cv2.imwrite('cropped_image.jpg', cropped_image)
-    cv2.imwrite('cropped_mask.jpg', cropped_mask)
-    print(cropped_image.shape)
-    print(cropped_mask.shape)
+    # cv2.imwrite('../wim_data/train/images/2023-04-21_48.mp4#t=0.jpg', cropped_image)
+    # cv2.imwrite('../results/2023-04-21_48.mp4#t=0/mask_2.png', cropped_mask)
+    # print(cropped_image.shape)
+    # print(cropped_mask.shape)
 
     image = crop_for_filling_post(image, mask, cropped_image)
-    cv2.imwrite('filled_image.jpg', image)
+    #cv2.imwrite('filled_image.jpg', image)
     print(image.shape)
+    
+    print('break_point')
 
 
     
