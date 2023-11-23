@@ -128,11 +128,14 @@ def generate_images(
         if image.shape[2] == 1:
             image = np.repeat(image, 3, axis=2)
         return image
-
+    print("1")
     if resolution != 512:
         noise_mode = 'random'
     with torch.no_grad():
+        print("2")
+        print(img_list)
         for i, ipath in enumerate(img_list):
+            print("3")
             iname = os.path.basename(ipath).replace('.jpg', '.png')
             print(f'Prcessing: {iname}')
             image = read_image(ipath)
