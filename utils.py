@@ -1,4 +1,4 @@
-import cv2
+import cv2, os
 import numpy as np
 from PIL import Image
 from typing import Any, Dict, List
@@ -83,3 +83,4 @@ def get_clicked_point(img_path):
     cv2.destroyAllWindows()
 
     return last_point
+
