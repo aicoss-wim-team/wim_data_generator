@@ -2,15 +2,16 @@ import cv2, os , random
 import numpy as np
 from datetime import datetime
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 ## Parameters
 CFG = {
-    'base_image_path': '../wim_data/objects/conveyer_resized.png', # 배경 컨베이어밸트 이미지
-    'object_images_folder': '../wim_data/objects/images_object/', # 객체 이미지 경로 
+    'base_image_path': '../wim_data/SAM_2_objects/conveyer_resized.png', # 배경 컨베이어밸트 이미지
+    'object_images_folder': '../wim_data/SAM_2_objects/images_object/', # 객체 이미지 경로 
     'max_objects' : 10,  # 배경 이미지의 해당 영역에서 사용할 수 있는 최대 객체 수
     'rectangle' : (300, 0, 680, 740), # 지정된 영역 (x 시작, y 시작, 너비, 높이)
     'max_overlap': 0.5, # 겹침 비율
-    'num_iter': 10, # 생성할 이미지 수
+    'num_iter': 10000, # 생성할 이미지 수
     'output_folder': '../wim_data/crop_paste/', # 생성 이미지 저장 경로
 }
 
@@ -83,7 +84,7 @@ print(f'Cropped obj: {len(object_images)}')
 
 work_date = datetime.now().strftime("%Y%m%d%H%M")
 # num_iter (생성할 이미지 수)
-for i in range(CFG['num_iter']):
+for i in tqdm(range(CFG['num_iter'])):
     # 기본 이미지 로드
     base_image = cv2.imread(CFG['base_image_path'])
     # 객체 이미지 배치 및 라벨 생성, 객체 클래스, 배치된 위치 저장
