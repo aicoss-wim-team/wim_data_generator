@@ -7,11 +7,12 @@ from tqdm import tqdm
 ## Parameters
 CFG = {
     'base_image_path': '../wim_data/SAM_2_objects/conveyer_resized.png', # 배경 컨베이어밸트 이미지
-    'object_images_folder': '../wim_data/SAM_2_objects/images_object/', # 객체 이미지 경로 
-    'max_objects' : 10,  # 배경 이미지의 해당 영역에서 사용할 수 있는 최대 객체 수
-    'rectangle' : (300, 0, 680, 740), # 지정된 영역 (x 시작, y 시작, 너비, 높이)
-    'max_overlap': 0.5, # 겹침 비율
-    'num_iter': 10000, # 생성할 이미지 수
+    'object_images_folder': '../wim_data/objects/images_object2/', # 객체 이미지 경로 
+    'max_objects' : 12,  # 배경 이미지에 붙일 최대 객체 수
+    'rectangle' : (300, 0, 680, 740), # 배경의 지정된 영역 설정 (x 시작, y 시작, 너비, 높이)
+    'max_overlap': 0.3, # 객체들의 겹침 허용 비율
+    'num_iter': 3, # 생성할 이미지 수
+    'max_dim': 500, # 샘플링 객체 크기 제한
     'output_folder': '../wim_data/crop_paste/', # 생성 이미지 저장 경로
 }
 
@@ -75,14 +76,23 @@ def calculate_object_size(obj_path, obj_name):
         return 0  # 이미지를 불러오지 못한 경우
     return image.shape[0] * image.shape[1]  # height * width
 
+def get_image_dimensions(obj_path, obj_name):
+    obj_img_path = os.path.join(obj_path, obj_name)
+    image = cv2.imread(obj_img_path, cv2.IMREAD_UNCHANGED)
+    if image is None:
+        return 0, 0  # 이미지를 불러오지 못한 경우
+    return image.shape[1], image.shape[0]  # width, height
+
 # 객체 이미지 목록 가져오기
 object_images = [f for f in os.listdir(CFG['object_images_folder']) if f.endswith('.jpg') or f.endswith('.png')]
-random.shuffle(object_images) # 랜덤화
 
-print(f'Cropped obj: {len(object_images)}')
+## dim 512 보다 큰 이미지는 제외 
+filtered_objects = [obj for obj in object_images if all(dim <= CFG['max_dim'] for dim in get_image_dimensions(CFG['object_images_folder'], obj))]
+print(f'총 객체 수 : {len(filtered_objects)}')
 
 
 work_date = datetime.now().strftime("%Y%m%d%H%M")
+
 # num_iter (생성할 이미지 수)
 for i in tqdm(range(CFG['num_iter'])):
     # 기본 이미지 로드
@@ -93,13 +103,13 @@ for i in tqdm(range(CFG['num_iter'])):
     placed_objects = []
     
     # 객체 샘플링
-    selected_objects = random.sample(object_images, CFG['max_objects'])
+    selected_objects = random.sample(filtered_objects, CFG['max_objects'])
 
     # 객체의 크기가 큰 순서대로 정렬하기 위한 객체 크기 확인 (딕셔너리 컴프래헨션 구조)
     object_sizes = {obj: calculate_object_size(CFG['object_images_folder'],obj) for obj in selected_objects}
     # 크기에 따라 selected_objects 정렬 (내림차순)
     selected_objects_sorted = sorted(selected_objects, key=lambda obj: object_sizes[obj], reverse=True)
-
+    print(selected_objects_sorted)
     # max_objects의 수 만큼 반복
     for obj_img_name in selected_objects_sorted:
         parts = obj_img_name.split('_')
@@ -196,9 +206,9 @@ for i in tqdm(range(CFG['num_iter'])):
     
     with open(output_label_path, 'w') as file:
         # 라벨 생성
-        for i,position in enumerate(placed_objects):
+        for j,position in enumerate(placed_objects):
             x_offset, y_offset, obj_width, obj_height = position
             # 라벨 좌표 및 바운딩 박스 크기를 계산
             yolo_label = convert_to_yolo_label(x_offset, y_offset, obj_width, obj_height, base_image.shape[1], base_image.shape[0])
-            file.write(f"{classes[i]} {yolo_label[0]} {yolo_label[1]} {yolo_label[2]} {yolo_label[3]}" + "\n")
+            file.write(f"{classes[j]} {yolo_label[0]} {yolo_label[1]} {yolo_label[2]} {yolo_label[3]}" + "\n")
         
